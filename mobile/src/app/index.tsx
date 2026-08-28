@@ -287,9 +287,9 @@ const styles = StyleSheet.create({
     width: 84,
     height: 84,
     borderRadius: 42,
-    backgroundColor: '#7C5CFF1F',
+    backgroundColor: '#6366F11F',
     borderWidth: 1,
-    borderColor: '#7C5CFF42',
+    borderColor: '#6366F142',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.two,
@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
   },
   chipSelected: {
     borderColor: Colors.accent,
-    backgroundColor: '#7C5CFF2E',
+    backgroundColor: '#6366F12E',
   },
   listHeader: {
     flexDirection: 'row',
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
   },
   folderPill: {
     borderRadius: 9,
-    backgroundColor: '#7C5CFF24',
+    backgroundColor: '#6366F124',
     paddingHorizontal: Spacing.two,
     paddingVertical: 4,
   },

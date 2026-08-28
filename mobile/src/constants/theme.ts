@@ -13,7 +13,7 @@ export const Colors = {
   background: '#0C0C11',
   backgroundElement: '#15151C',
   border: '#22222C',
-  accent: '#7C5CFF',
+  accent: '#6366F1',
   danger: '#FF5C5C',
 } as const;
 
