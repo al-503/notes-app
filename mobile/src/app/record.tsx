@@ -76,8 +76,9 @@ export default function RecordScreen() {
     try {
       saveNote(transcript, durationMillis, selectedFolder, tags);
       router.back();
-    } catch {
-      setError('Impossible de sauvegarder la note.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(`Impossible de sauvegarder la note : ${message}`);
     }
   };
 

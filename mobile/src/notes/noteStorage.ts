@@ -7,19 +7,50 @@ export const DEFAULT_FOLDER = 'captures';
 
 // Sur Android, un dossier public (pas le stockage privé de l'app) pour que
 // Syncthing puisse le lire — voir ARCHITECTURE.md, la sync du contrat.
-const ANDROID_PUBLIC_NOTES_URI = 'file:///storage/emulated/0/Documents/Voix/notes';
+const ANDROID_PUBLIC_SEGMENTS = ['Documents', 'Voix', 'notes'];
 
 function notesRoot() {
   if (Platform.OS === 'android') {
-    return new Directory(ANDROID_PUBLIC_NOTES_URI);
+    return new Directory('file:///storage/emulated/0', ...ANDROID_PUBLIC_SEGMENTS);
   }
   return new Directory(Paths.document, 'notes');
 }
 
-export function canAccessNotesStorage(): boolean {
-  try {
+// expo-file-system valide la permission d'écriture sur la cible elle-même
+// avant de la créer : sur un chemin externe non encore existant, ce test
+// répond toujours "refusé" (Java File.canWrite() sur un chemin inexistant
+// vaut toujours false), permission Android accordée ou pas. On contourne en
+// ne créant jamais un dossier/fichier "à distance" : on avance d'un niveau à
+// la fois via .createDirectory()/.createFile() du PARENT (qui, lui, existe
+// déjà au moment de l'appel).
+function ensureDirectory(parent: Directory, name: string): Directory {
+  const child = new Directory(parent, name);
+  return child.exists ? child : parent.createDirectory(name);
+}
+
+function ensureNotesRoot(): Directory {
+  if (Platform.OS !== 'android') {
+    // Stockage privé de l'app (sandbox) : toujours lisible/inscriptible par
+    // elle-même, la validation par existence ci-dessus ne s'y applique pas.
     const root = notesRoot();
     root.create({ intermediates: true, idempotent: true });
+    return root;
+  }
+  let dir = new Directory('file:///storage/emulated/0');
+  for (const segment of ANDROID_PUBLIC_SEGMENTS) {
+    dir = ensureDirectory(dir, segment);
+  }
+  return dir;
+}
+
+function ensureFile(dir: Directory, fileName: string): File {
+  const file = new File(dir, fileName);
+  return file.exists ? file : dir.createFile(fileName, 'text/markdown');
+}
+
+export function canAccessNotesStorage(): boolean {
+  try {
+    ensureNotesRoot();
     return true;
   } catch {
     return false;
@@ -36,10 +67,7 @@ export function saveNote(
   const id = makeNoteId(now);
   const cleanFolder = folder.trim() || DEFAULT_FOLDER;
 
-  const dir = new Directory(notesRoot(), cleanFolder);
-  dir.create({ intermediates: true, idempotent: true });
-
-  const file = new File(dir, `${id}.md`);
+  const dir = ensureDirectory(ensureNotesRoot(), cleanFolder);
   const content = serializeNote(
     {
       id,
@@ -52,7 +80,7 @@ export function saveNote(
     },
     transcript,
   );
-  file.create({ intermediates: true, overwrite: true });
+  const file = ensureFile(dir, `${id}.md`);
   file.write(content);
 
   return file.uri;
@@ -106,8 +134,7 @@ export function updateNote(
   const nextBody = updates.body ?? existing.body;
 
   if (nextFolder !== currentFolder) {
-    const targetDir = new Directory(notesRoot(), nextFolder);
-    targetDir.create({ intermediates: true, idempotent: true });
+    const targetDir = ensureDirectory(notesRoot(), nextFolder);
     file.move(targetDir);
   }
   file.write(serializeNote(nextFrontmatter, nextBody));

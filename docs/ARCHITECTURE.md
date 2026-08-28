@@ -212,6 +212,21 @@ l'accueil (`canAccessNotesStorage()` détecte si l'accès manque). iOS n'a pas
 cet équivalent — `Paths.document` (sandbox) y reste utilisé tel quel,
 problème à retraiter séparément si le projet vise iOS un jour.
 
+**Deuxième piège (résolu) : `expo-file-system` refuse de créer du neuf en
+stockage externe.** Même la permission `MANAGE_EXTERNAL_STORAGE` accordée,
+`Directory.create()`/`File.create()`/`File.write()` valident la permission
+d'écriture **sur la cible elle-même** avant de la créer — et `File.canWrite()`
+côté Android vaut toujours `false` sur un chemin qui n'existe pas encore,
+donc ça échoue systématiquement ("missing write permission") pour tout
+fichier/dossier réellement nouveau hors des dossiers internes de l'app
+(`getInternalPathPermissions` dans `expo-modules-core` accorde un accès
+inconditionnel aux dossiers internes, mais pas à un chemin externe comme
+`Documents/Voix/notes`). Corrigé dans `noteStorage.ts` : on ne crée plus
+jamais un chemin imbriqué en une fois ; `ensureDirectory()`/`ensureFile()`
+avancent d'un niveau à la fois via `.createDirectory()`/`.createFile()` du
+dossier **parent** (qui, lui, existe déjà au moment de l'appel — la
+validation porte sur lui, pas sur la cible inexistante).
+
 Reste à faire : installer Syncthing sur le téléphone (app officielle, dispo
 sur le Play Store) et le pointer vers `Documents/Voix/notes` une fois la
 permission accordée dans l'app.
