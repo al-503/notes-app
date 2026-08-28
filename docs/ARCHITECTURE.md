@@ -83,7 +83,7 @@ Une vraie transcription live nécessiterait un module natif type
 d'Expo Go. Contraire à la contrainte "testé via Expo Go, pas d'App Store".
 
 **Décision retenue : dictée du clavier système.** Sur l'écran d'enregistrement,
-un `TextInput` est autofocus pendant que `expo-av` enregistre l'audio (pour la
+un `TextInput` est autofocus pendant que `expo-audio` enregistre l'audio (pour la
 lecture ultérieure). L'utilisateur active la dictée native via le micro du
 clavier iOS/Android pour obtenir le texte — zéro module natif, zéro dev client,
 100 % Expo Go. Écart assumé avec la maquette : le texte n'apparaît pas "tout
@@ -100,6 +100,17 @@ EAS (reste gratuit et local, aucun lien avec l'abonnement Claude).
 2. **Enregistrement (`record`)** — enregistre l'audio, lance la transcription
    on-device, affiche le texte obtenu, laisse choisir dossier + tags, puis "Sauver"
    écrit le fichier `.md` au bon format.
+
+   Implémenté pour l'étape 2 du MVP sur l'écran unique (`index`, avant que
+   dossiers/tags n'existent) : le dossier est fixé à `captures/` en dur, `tags`
+   est toujours `[]`, `title` est dérivé des ~8 premiers mots de la
+   transcription, `created` est en UTC (`Date.toISOString()`, pas d'offset
+   local — pas de dépendance timezone pour si peu). Le fichier `.md` est écrit
+   dans `Paths.document` (sandbox de l'app sur le téléphone, via
+   `expo-file-system`), pas littéralement à la racine du repo : c'est ce
+   dossier qu'infra-dev devra pointer avec Syncthing à l'étape 4. L'audio
+   enregistré n'est pas encore persisté (pas de champ dans le contrat pour son
+   chemin) — à revoir quand l'écran détail (lecture audio) sera construit.
 3. **Détail de note (`note/[id]`)** — voir / éditer le texte, changer dossier/tags,
    supprimer.
 4. **Dossiers (`folders`)** — liste des dossiers, nombre de notes, filtrage.

@@ -7,6 +7,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { saveNote } from '@/notes/noteStorage';
 
 function formatDuration(ms: number) {
   const totalSeconds = Math.floor(ms / 1000);
@@ -20,9 +21,11 @@ export default function RecordScreen() {
   const { isRecording, durationMillis, start, stop } = useRecorder();
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
   const onToggleRecording = async () => {
     setError(null);
+    setSavedMessage(null);
     try {
       if (isRecording) {
         await stop();
@@ -31,6 +34,19 @@ export default function RecordScreen() {
       }
     } catch {
       setError("Impossible d'accéder au micro. Vérifiez les permissions de l'app.");
+    }
+  };
+
+  const canSave = !isRecording && transcript.trim().length > 0;
+
+  const onSave = () => {
+    setError(null);
+    try {
+      saveNote(transcript, durationMillis);
+      setTranscript('');
+      setSavedMessage('Note sauvegardée.');
+    } catch {
+      setError("Impossible de sauvegarder la note.");
     }
   };
 
@@ -59,6 +75,11 @@ export default function RecordScreen() {
             {error}
           </ThemedText>
         )}
+        {savedMessage && (
+          <ThemedText type="small" themeColor="text" style={styles.saved}>
+            {savedMessage}
+          </ThemedText>
+        )}
 
         <ThemedView type="backgroundElement" style={styles.transcriptCard}>
           <ThemedText type="small" themeColor="textSecondary">
@@ -73,6 +94,15 @@ export default function RecordScreen() {
             style={[styles.transcriptInput, { color: theme.text }]}
           />
         </ThemedView>
+
+        <Pressable
+          onPress={onSave}
+          disabled={!canSave}
+          style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}>
+          <ThemedText type="smallBold" style={styles.recordButtonLabel}>
+            Sauver la note
+          </ThemedText>
+        </Pressable>
       </SafeAreaView>
     </ThemedView>
   );
@@ -112,6 +142,9 @@ const styles = StyleSheet.create({
   error: {
     color: '#FF5C5C',
   },
+  saved: {
+    color: '#4CAF7D',
+  },
   transcriptCard: {
     flex: 1,
     borderRadius: Spacing.four,
@@ -123,5 +156,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     textAlignVertical: 'top',
+  },
+  saveButton: {
+    backgroundColor: '#7C5CFF',
+    borderRadius: Spacing.four,
+    paddingVertical: Spacing.three,
+    alignItems: 'center',
+    marginBottom: Spacing.three,
+  },
+  saveButtonDisabled: {
+    opacity: 0.4,
   },
 });
