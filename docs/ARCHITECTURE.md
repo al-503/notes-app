@@ -50,28 +50,48 @@ Règles du format :
 
 ```
 mobile/
-├── app/                      # écrans (expo-router)
-│   ├── index.tsx             # écran d'accueil : bouton d'enregistrement + notes récentes
-│   ├── record.tsx            # écran d'enregistrement / transcription
-│   ├── note/[id].tsx         # détail + édition d'une note
-│   └── folders.tsx           # liste des dossiers / navigation
 ├── src/
+│   ├── app/                  # écrans (expo-router)
+│   │   ├── index.tsx         # écran d'accueil : bouton d'enregistrement + notes récentes
+│   │   ├── record.tsx        # écran d'enregistrement + dictée
+│   │   ├── note/[id].tsx     # détail + édition d'une note
+│   │   └── folders.tsx       # liste des dossiers / navigation
 │   ├── notes/
 │   │   ├── noteFormat.ts     # (dé)sérialisation frontmatter + corps  ← le contrat
 │   │   ├── noteStorage.ts    # lire/écrire les fichiers .md dans notes/
 │   │   └── useNotes.ts       # hook : liste, filtre par dossier/tag
 │   ├── audio/
-│   │   ├── useRecorder.ts    # expo-av : start/stop, fichier temporaire
-│   │   └── transcribe.ts     # dictée native de l'OS → texte
-│   └── ui/                   # petits composants réutilisables
+│   │   └── useRecorder.ts    # expo-audio : start/stop, fichier temporaire
+│   └── components/           # petits composants réutilisables
 ├── app.json                  # config Expo
 └── tsconfig.json             # TS strict
 ```
+
+Pas de `transcribe.ts` : la dictée passe par le clavier système sur un
+`TextInput` (voir §2bis), rien à coder côté transcription.
 
 Le dossier `notes/` (celui que Syncthing synchronise) vit **en dehors** de `mobile/`,
 à la racine du projet, pour être partagé avec le PC.
 
 ---
+
+## 2bis. Décision technique : transcription on-device (100 % Expo Go)
+
+Les maquettes montrent une transcription "en direct" pendant l'enregistrement.
+Une vraie transcription live nécessiterait un module natif type
+`expo-speech-recognition`, qui exige un dev client / build EAS — donc de sortir
+d'Expo Go. Contraire à la contrainte "testé via Expo Go, pas d'App Store".
+
+**Décision retenue : dictée du clavier système.** Sur l'écran d'enregistrement,
+un `TextInput` est autofocus pendant que `expo-av` enregistre l'audio (pour la
+lecture ultérieure). L'utilisateur active la dictée native via le micro du
+clavier iOS/Android pour obtenir le texte — zéro module natif, zéro dev client,
+100 % Expo Go. Écart assumé avec la maquette : le texte n'apparaît pas "tout
+seul" au fil de la parole (animation de la maquette), il apparaît via le
+clavier système comme dans n'importe quel champ de texte iOS/Android.
+
+Si un jour l'UX à bouton unique devient prioritaire, réévaluer un dev client
+EAS (reste gratuit et local, aucun lien avec l'abonnement Claude).
 
 ## 3. Les écrans (MVP)
 
