@@ -14,7 +14,7 @@ export const Colors = {
   backgroundElement: '#15151C',
   border: '#22222C',
   accent: '#6366F1',
-  danger: '#FF5C5C',
+  danger: '#FF7A7A',
 } as const;
 
 export type ThemeColor = keyof typeof Colors;

@@ -167,6 +167,24 @@ clavier sur `TextInput`, cf. §2bis) — seul l'habillage change, pas la logique
 Le sélecteur dossier/tags et le bouton Sauver (propres à notre écran fusionné,
 pas dans cette maquette précise) restent en dessous, inchangés.
 
+**Alignement sur le panneau système de design** (`images/Systéme_Design.png`) :
+- `danger` corrigé `#FF5C5C` → `#FF7A7A` (couleur exacte du panneau).
+- `accent` reste `#6366F1` (indigo choisi explicitly par l'utilisateur, pas
+  `#7C5CFF` du panneau — décision confirmée, ne pas revenir dessus).
+- Échelle typo revue dans `ThemedText` (`themed-text.tsx`) pour coller aux
+  specs : Titre d'écran 30/800 (`title`), Titre de note 24/800 (`title` +
+  `fontSize` local), Titre de carte 17/700 (nouveau type `cardTitle`, utilisé
+  par `NoteCard`), Corps 16/400 (`default`), Extrait/secondaire 14/400
+  (`small`), Étiquette de section 12/700 + tracking (nouveau type
+  `sectionLabel`, remplace les combos `type="small" + style letterSpacing`
+  dupliqués dans 3 écrans).
+- `NoteCard` : retour tactile pression → 0,97 d'échelle (`cardPressed`), comme
+  spécifié ("toute la carte est tactile").
+- Pas touché (déjà proche, ou coût > bénéfice) : l'échelle d'espacement de
+  base (4/8/12/18/22/34 dans le panneau vs notre `Spacing` en 2/4/8/16/24/32/64
+  — décalage mineur, changer la base casserait beaucoup d'écrans pour un
+  gain visuel faible).
+
 ---
 
 ## 4. Sync (implémenté partiellement : Pi ↔ PC fait, téléphone en cours)

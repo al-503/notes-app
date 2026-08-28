@@ -101,9 +101,9 @@ function NoteCard({ note }: { note: Note }) {
           params: { id: note.frontmatter.id, folder: note.frontmatter.folder },
         })
       }
-      style={styles.card}>
+      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}>
       <View style={styles.cardHeader}>
-        <ThemedText type="smallBold" numberOfLines={1} style={styles.cardTitle}>
+        <ThemedText type="cardTitle" numberOfLines={1} style={styles.cardTitle}>
           {note.frontmatter.title}
         </ThemedText>
         <ThemedText type="code" themeColor="textMuted">
@@ -226,7 +226,7 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.listHeader}>
-              <ThemedText type="small" themeColor="textMuted" style={styles.sectionLabel}>
+              <ThemedText type="sectionLabel" themeColor="textMuted">
                 RÉCENTES
               </ThemedText>
               <ThemedText type="code" themeColor="textMuted">
@@ -386,9 +386,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'baseline',
   },
-  sectionLabel: {
-    letterSpacing: 1,
-  },
   list: {
     gap: Spacing.two,
     paddingBottom: Spacing.three,
@@ -400,6 +397,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundElement,
     padding: Spacing.three,
     gap: Spacing.one,
+  },
+  cardPressed: {
+    transform: [{ scale: 0.97 }],
   },
   cardHeader: {
     flexDirection: 'row',

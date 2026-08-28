@@ -124,12 +124,12 @@ export default function NoteDetailScreen() {
               style={[styles.bodyInput, { color: theme.text }]}
             />
 
-            <ThemedText type="small" themeColor="textMuted" style={styles.sectionLabel}>
+            <ThemedText type="sectionLabel" themeColor="textMuted" style={styles.sectionLabel}>
               DOSSIER
             </ThemedText>
             <FolderPicker folders={folders} selected={folder} onSelect={setFolder} onCreateFolder={onCreateFolder} />
 
-            <ThemedText type="small" themeColor="textMuted" style={styles.sectionLabel}>
+            <ThemedText type="sectionLabel" themeColor="textMuted" style={styles.sectionLabel}>
               TAGS
             </ThemedText>
             <TagEditor tags={tags} onChange={setTags} />
@@ -203,8 +203,8 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.four,
   },
   title: {
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 24,
+    lineHeight: 30,
   },
   body: {
     marginTop: Spacing.three,
@@ -228,14 +228,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   titleInput: {
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 24,
+    lineHeight: 30,
     fontWeight: '800',
   },
   bodyInput: {
     minHeight: 140,
     fontSize: 16,
-    lineHeight: 24,
+    lineHeight: 27,
     textAlignVertical: 'top',
     borderRadius: 22,
     borderWidth: 1,
@@ -245,7 +245,6 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two,
   },
   sectionLabel: {
-    letterSpacing: 1,
     marginTop: Spacing.two,
   },
   editActions: {

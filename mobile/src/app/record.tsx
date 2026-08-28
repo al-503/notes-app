@@ -128,7 +128,7 @@ export default function RecordScreen() {
           )}
 
           <ThemedView type="backgroundElement" style={styles.transcriptCard}>
-            <ThemedText type="small" themeColor="textMuted" style={styles.sectionLabel}>
+            <ThemedText type="sectionLabel" themeColor="textMuted">
               TRANSCRIPTION
             </ThemedText>
             <TextInput
@@ -148,7 +148,7 @@ export default function RecordScreen() {
             <RecordButton onPress={onToggleRecording} active={isRecording} />
           </View>
 
-          <ThemedText type="small" themeColor="textMuted" style={styles.sectionLabel}>
+          <ThemedText type="sectionLabel" themeColor="textMuted">
             DOSSIER
           </ThemedText>
           <FolderPicker
@@ -158,7 +158,7 @@ export default function RecordScreen() {
             onCreateFolder={onCreateFolder}
           />
 
-          <ThemedText type="small" themeColor="textMuted" style={styles.sectionLabel}>
+          <ThemedText type="sectionLabel" themeColor="textMuted">
             TAGS
           </ThemedText>
           <TagEditor tags={tags} onChange={setTags} />
@@ -251,11 +251,8 @@ const styles = StyleSheet.create({
   transcriptInput: {
     minHeight: 90,
     fontSize: 16,
-    lineHeight: 24,
+    lineHeight: 27,
     textAlignVertical: 'top',
-  },
-  sectionLabel: {
-    letterSpacing: 1,
   },
   recordZone: {
     alignItems: 'center',
