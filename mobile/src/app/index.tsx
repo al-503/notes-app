@@ -31,7 +31,10 @@ export default function RecordScreen() {
       if (isRecording) {
         await stop();
       } else {
+        transcriptInputRef.current?.focus();
         await start();
+        // La popup de permission micro (1re fois seulement) referme le clavier :
+        // on le rouvre après coup, au cas où.
         transcriptInputRef.current?.focus();
       }
     } catch {
