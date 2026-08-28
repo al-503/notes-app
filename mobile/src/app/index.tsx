@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRecorder } from '@/audio/useRecorder';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { saveNote } from '@/notes/noteStorage';
 
@@ -128,32 +128,36 @@ const styles = StyleSheet.create({
     marginTop: Spacing.four,
   },
   recordCard: {
-    borderRadius: Spacing.four,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: Colors.border,
     padding: Spacing.four,
     alignItems: 'center',
     gap: Spacing.two,
   },
   recordButton: {
-    backgroundColor: '#7C5CFF',
+    backgroundColor: Colors.accent,
     borderRadius: 999,
     paddingHorizontal: Spacing.five,
     paddingVertical: Spacing.three,
   },
   recordButtonActive: {
-    backgroundColor: '#FF5C5C',
+    backgroundColor: Colors.danger,
   },
   recordButtonLabel: {
     color: '#FFFFFF',
   },
   error: {
-    color: '#FF5C5C',
+    color: Colors.danger,
   },
   saved: {
     color: '#4CAF7D',
   },
   transcriptCard: {
     flex: 1,
-    borderRadius: Spacing.four,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: Colors.border,
     padding: Spacing.three,
     gap: Spacing.two,
   },
@@ -164,8 +168,8 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   saveButton: {
-    backgroundColor: '#7C5CFF',
-    borderRadius: Spacing.four,
+    backgroundColor: Colors.accent,
+    borderRadius: 19,
     paddingVertical: Spacing.three,
     alignItems: 'center',
     marginBottom: Spacing.three,
