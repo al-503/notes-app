@@ -1,9 +1,9 @@
 import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useRecorder } from '@/audio/useRecorder';
+import { useSpeechToText } from '@/audio/useSpeechToText';
 import { RecordButton } from '@/components/record-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -15,12 +15,12 @@ import { DEFAULT_FOLDER, listFolders, saveNote } from '@/notes/noteStorage';
 const WAVEFORM_BARS = 28;
 const SILENCE_LEVEL = 0.06;
 
-function meteringToLevel(db: number) {
-  // dB approx. -60 (silence) .. 0 (max) -> 0..1
-  return Math.min(1, Math.max(SILENCE_LEVEL, (db + 60) / 60));
+function volumeToLevel(value: number) {
+  // volumechange value ranges roughly -2 (silence) .. 10 (loud) -> 0..1
+  return Math.min(1, Math.max(SILENCE_LEVEL, (value + 2) / 12));
 }
 
-function Waveform({ isRecording, metering }: { isRecording: boolean; metering: number }) {
+function Waveform({ isRecording, volume }: { isRecording: boolean; volume: number }) {
   const [levels, setLevels] = useState<number[]>(() => Array(WAVEFORM_BARS).fill(SILENCE_LEVEL));
 
   useEffect(() => {
@@ -28,8 +28,8 @@ function Waveform({ isRecording, metering }: { isRecording: boolean; metering: n
       setLevels(Array(WAVEFORM_BARS).fill(SILENCE_LEVEL));
       return;
     }
-    setLevels((prev) => [...prev.slice(1), meteringToLevel(metering)]);
-  }, [metering, isRecording]);
+    setLevels((prev) => [...prev.slice(1), volumeToLevel(volume)]);
+  }, [volume, isRecording]);
 
   return (
     <View style={styles.waveform}>
@@ -47,10 +47,8 @@ function uniqueFolders() {
 
 export default function RecordScreen() {
   const theme = useTheme();
-  const { isRecording, durationMillis, metering, start, stop } = useRecorder();
-  const [transcript, setTranscript] = useState('');
+  const { isRecording, transcript, setTranscript, volume, durationMillis, start, stop } = useSpeechToText();
   const [error, setError] = useState<string | null>(null);
-  const transcriptInputRef = useRef<TextInput>(null);
 
   const [folders, setFolders] = useState<string[]>(uniqueFolders);
   const [selectedFolder, setSelectedFolder] = useState(DEFAULT_FOLDER);
@@ -63,16 +61,12 @@ export default function RecordScreen() {
     setError(null);
     try {
       if (isRecording) {
-        await stop();
+        stop();
       } else {
-        transcriptInputRef.current?.focus();
         await start();
-        // La popup de permission micro (1re fois seulement) referme le clavier :
-        // on le rouvre après coup, au cas où.
-        transcriptInputRef.current?.focus();
       }
     } catch {
-      setError("Impossible d'accéder au micro. Vérifiez les permissions de l'app.");
+      setError("Impossible d'accéder au micro ou à la dictée. Vérifiez les permissions de l'app.");
     }
   };
 
@@ -138,7 +132,7 @@ export default function RecordScreen() {
             </ThemedText>
           </View>
 
-          <Waveform isRecording={isRecording} metering={metering} />
+          <Waveform isRecording={isRecording} volume={volume} />
 
           {error && (
             <ThemedText type="small" style={styles.error}>
@@ -150,11 +144,7 @@ export default function RecordScreen() {
             <ThemedText type="small" themeColor="textMuted" style={styles.sectionLabel}>
               TRANSCRIPTION
             </ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              Le clavier s’ouvre à l’enregistrement : appuyez sur son icône micro pour dicter
-            </ThemedText>
             <TextInput
-              ref={transcriptInputRef}
               value={transcript}
               onChangeText={setTranscript}
               multiline

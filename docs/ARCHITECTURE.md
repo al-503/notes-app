@@ -75,23 +75,28 @@ Le dossier `notes/` (celui que Syncthing synchronise) vit **en dehors** de `mobi
 
 ---
 
-## 2bis. Décision technique : transcription on-device (100 % Expo Go)
+## 2bis. Décision technique : transcription on-device (historique)
 
-Les maquettes montrent une transcription "en direct" pendant l'enregistrement.
-Une vraie transcription live nécessiterait un module natif type
-`expo-speech-recognition`, qui exige un dev client / build EAS — donc de sortir
-d'Expo Go. Contraire à la contrainte "testé via Expo Go, pas d'App Store".
+Première approche (abandonnée) : dictée du clavier système sur un `TextInput`,
+pour rester 100 % Expo Go. En usage réel, la double manipulation (bouton de
+l'app puis micro du clavier séparément) était confuse — pas le comportement
+attendu ("j'appuie sur le micro de l'app et le texte apparaît").
 
-**Décision retenue : dictée du clavier système.** Sur l'écran d'enregistrement,
-un `TextInput` est autofocus pendant que `expo-audio` enregistre l'audio (pour la
-lecture ultérieure). L'utilisateur active la dictée native via le micro du
-clavier iOS/Android pour obtenir le texte — zéro module natif, zéro dev client,
-100 % Expo Go. Écart assumé avec la maquette : le texte n'apparaît pas "tout
-seul" au fil de la parole (animation de la maquette), il apparaît via le
-clavier système comme dans n'importe quel champ de texte iOS/Android.
+**Décision retenue (revue) : dev client + `expo-speech-recognition`.** L'appli
+sort d'Expo Go pur ; elle tourne maintenant via un client de dev buildé une
+fois avec EAS Build (`eas.json`, profil `development`) et installé
+manuellement sur le téléphone (toujours gratuit, toujours local, toujours pas
+d'App Store — juste un binaire perso à la place d'Expo Go). Le bouton micro de
+l'app déclenche directement `ExpoSpeechRecognitionModule.start()`
+(reconnaissance vocale native iOS/Android), le texte apparaît au fil de la
+parole via l'événement `result` (`src/audio/useSpeechToText.ts`). `expo-audio`
+est retiré : la forme d'onde utilise l'événement `volumechange` du module de
+reconnaissance vocale, qui peut aussi persister l'audio plus tard
+(`recordingOptions.persist`) si besoin pour l'écran détail.
 
-Si un jour l'UX à bouton unique devient prioritaire, réévaluer un dev client
-EAS (reste gratuit et local, aucun lien avec l'abonnement Claude).
+Limite connue : chaque `start()` ouvre une nouvelle session de dictée — arrêter
+puis relancer remplace le texte plutôt que de l'accumuler. Pas géré pour
+l'instant (pas demandé, complexité réelle avec l'édition manuelle).
 
 ## 3. Les écrans (MVP)
 

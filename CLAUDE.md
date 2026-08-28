@@ -20,11 +20,12 @@ Si un jour on veut de la génération 100 % automatique dans l'appli → modèle
 
 ## Stack
 
-- **Mobile** : Expo (SDK 54, React Native, expo-router), testé via Expo Go sur mon téléphone. Pas d'App Store.
-  Rester sur la dernière version taguée `sdk-XX` stable (voir `npm view expo dist-tags`) : le SDK "latest"
-  npm est parfois en avance sur ce que l'appli Expo Go publiée sur les stores supporte réellement.
-- **Audio** : `expo-audio` pour l'enregistrement (`expo-av` est déprécié sur ce SDK).
-- **Transcription** : dictée du clavier système sur un `TextInput` (gratuite, on-device, 100% Expo Go — voir docs/ARCHITECTURE.md §2bis). Pas de Whisper hébergé.
+- **Mobile** : Expo (SDK 54, React Native, expo-router), testé sur mon téléphone via un **dev client**
+  buildé avec EAS (`eas.json`, profil `development` — plus Expo Go seul, cf. docs/ARCHITECTURE.md §2bis).
+  Toujours gratuit et local, toujours pas d'App Store. Rester sur la dernière version taguée `sdk-XX`
+  stable (voir `npm view expo dist-tags`) : le SDK "latest" npm est parfois en avance sur ce qui est stable.
+- **Transcription** : `expo-speech-recognition` (reconnaissance vocale native iOS/Android, on-device quand
+  possible), déclenchée par le bouton micro de l'app. Pas de Whisper hébergé.
 - **Stockage** : fichiers Markdown dans `notes/`, un fichier par note.
 - **Sync** : Syncthing sur un Raspberry Pi 4 (hub entre téléphone et PC). Zéro cloud.
 - **Génération** : Claude Code lit `notes/`, les slash commands produisent le contenu.
