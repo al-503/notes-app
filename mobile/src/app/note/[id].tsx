@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BackButton } from '@/components/back-button';
 import { FolderPicker } from '@/components/folder-picker';
 import { TagEditor } from '@/components/tag-editor';
 import { ThemedText } from '@/components/themed-text';
@@ -84,11 +85,7 @@ export default function NoteDetailScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.topBar}>
-          <Pressable onPress={() => router.back()} style={styles.topBarButton}>
-            <ThemedText type="smallBold" themeColor="textSecondary">
-              ← Retour
-            </ThemedText>
-          </Pressable>
+          <BackButton />
           {note && !isEditing && (
             <View style={styles.topBarActions}>
               <Pressable onPress={onDelete} style={styles.topBarButton}>

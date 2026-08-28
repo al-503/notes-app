@@ -1,8 +1,9 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { FlatList, Pressable, StyleSheet } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BackButton } from '@/components/back-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors, Spacing } from '@/constants/theme';
@@ -20,11 +21,9 @@ export default function FoldersScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <ThemedText type="smallBold" themeColor="textSecondary">
-            ← Retour
-          </ThemedText>
-        </Pressable>
+        <View style={styles.backButton}>
+          <BackButton />
+        </View>
 
         <ThemedText type="title" style={styles.title}>
           Dossiers
