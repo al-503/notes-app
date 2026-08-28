@@ -1,10 +1,10 @@
-import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useRecorder } from '@/audio/useRecorder';
+import { RecordButton } from '@/components/record-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors, Spacing } from '@/constants/theme';
@@ -168,16 +168,7 @@ export default function RecordScreen() {
             <ThemedText type="smallBold" themeColor="textSecondary">
               {isRecording ? 'Appuyez pour arrêter et transcrire' : 'Appuyez pour enregistrer'}
             </ThemedText>
-            <Pressable
-              onPress={onToggleRecording}
-              style={[styles.recordButton, isRecording && styles.recordButtonActive]}>
-              <View style={styles.recordGlow} />
-              {isRecording ? (
-                <View style={styles.stopIcon} />
-              ) : (
-                <Feather name="mic" size={30} color="#FFFFFF" />
-              )}
-            </Pressable>
+            <RecordButton onPress={onToggleRecording} active={isRecording} />
           </View>
 
           <ThemedText type="small" themeColor="textMuted" style={styles.sectionLabel}>
@@ -391,34 +382,8 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
     paddingVertical: Spacing.two,
   },
-  recordButton: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: Colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  recordButtonActive: {
-    backgroundColor: Colors.danger,
-  },
   recordButtonLabel: {
     color: '#FFFFFF',
-  },
-  recordGlow: {
-    position: 'absolute',
-    top: -28,
-    right: -28,
-    bottom: -28,
-    left: -28,
-    borderRadius: 76,
-    backgroundColor: '#7C5CFF33',
-  },
-  stopIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
   },
   saveButton: {
     backgroundColor: Colors.accent,

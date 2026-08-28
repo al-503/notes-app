@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { RecordButton } from '@/components/record-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors, Spacing } from '@/constants/theme';
@@ -208,10 +209,7 @@ export default function HomeScreen() {
           <ThemedText type="smallBold" themeColor={isEmpty ? 'accent' : 'textSecondary'}>
             {isEmpty ? 'Enregistrer ma première note' : 'Appuyez pour enregistrer'}
           </ThemedText>
-          <Pressable onPress={() => router.push('/record')} style={styles.recordButton}>
-            <View style={styles.recordGlow} />
-            <Feather name="mic" size={30} color="#FFFFFF" />
-          </Pressable>
+          <RecordButton onPress={() => router.push('/record')} />
         </View>
       </SafeAreaView>
     </ThemedView>
@@ -396,22 +394,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.two,
     paddingBottom: Spacing.three,
-  },
-  recordButton: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: Colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  recordGlow: {
-    position: 'absolute',
-    top: -30,
-    right: -30,
-    bottom: -30,
-    left: -30,
-    borderRadius: 78,
-    backgroundColor: '#7C5CFF33',
   },
 });
