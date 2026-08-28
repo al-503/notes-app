@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -22,6 +22,7 @@ export default function RecordScreen() {
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const transcriptInputRef = useRef<TextInput>(null);
 
   const onToggleRecording = async () => {
     setError(null);
@@ -31,6 +32,7 @@ export default function RecordScreen() {
         await stop();
       } else {
         await start();
+        transcriptInputRef.current?.focus();
       }
     } catch {
       setError("Impossible d'accéder au micro. Vérifiez les permissions de l'app.");
@@ -83,9 +85,10 @@ export default function RecordScreen() {
 
         <ThemedView type="backgroundElement" style={styles.transcriptCard}>
           <ThemedText type="small" themeColor="textSecondary">
-            Dictez avec le micro du clavier pour obtenir le texte
+            Le clavier s’ouvre à l’enregistrement : appuyez sur son icône micro pour dicter
           </ThemedText>
           <TextInput
+            ref={transcriptInputRef}
             value={transcript}
             onChangeText={setTranscript}
             multiline
