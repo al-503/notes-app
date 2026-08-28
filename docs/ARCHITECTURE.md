@@ -117,6 +117,16 @@ EAS (reste gratuit et local, aucun lien avec l'abonnement Claude).
 
 Post-MVP : recherche plein texte, marquage `processed`, export.
 
+**Étape 3 du MVP (écran de liste)** — implémentée partiellement : `index` est
+devenu l'écran d'accueil (titre "Notes", liste des notes via `listNotes()`,
+bouton "Enregistrer" qui pousse vers `/record`). `record` est maintenant son
+propre écran (bouton "Annuler" pour revenir), il redirige vers l'accueil après
+sauvegarde. `note/[id]` affiche le texte complet en lecture seule (id + dossier
+passés en paramètres de route). **Pas encore fait** : édition du texte,
+suppression, sélecteur dossier/tags, écran `folders` dédié — `listNotes()` lit
+déjà tous les dossiers sous `notes/`, donc `folders` viendra sans changement de
+contrat quand on s'y attaque.
+
 ---
 
 ## 4. Sync (rempli par infra-dev)

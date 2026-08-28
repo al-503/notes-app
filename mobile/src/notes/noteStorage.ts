@@ -1,14 +1,18 @@
 import { Directory, File, Paths } from 'expo-file-system';
 
-import { deriveTitle, makeNoteId, serializeNote } from './noteFormat';
+import { deriveTitle, makeNoteId, Note, parseNote, serializeNote } from './noteFormat';
 
 export const DEFAULT_FOLDER = 'captures';
+
+function notesRoot() {
+  return new Directory(Paths.document, 'notes');
+}
 
 export function saveNote(transcript: string, durationMillis: number) {
   const now = new Date();
   const id = makeNoteId(now);
 
-  const dir = new Directory(Paths.document, 'notes', DEFAULT_FOLDER);
+  const dir = new Directory(notesRoot(), DEFAULT_FOLDER);
   dir.create({ intermediates: true, idempotent: true });
 
   const file = new File(dir, `${id}.md`);
@@ -28,4 +32,27 @@ export function saveNote(transcript: string, durationMillis: number) {
   file.write(content);
 
   return file.uri;
+}
+
+export function listNotes(): Note[] {
+  const root = notesRoot();
+  if (!root.exists) return [];
+
+  const notes: Note[] = [];
+  for (const entry of root.list()) {
+    if (!(entry instanceof Directory)) continue;
+    for (const item of entry.list()) {
+      if (!(item instanceof File) || item.extension !== '.md') continue;
+      const note = parseNote(item.textSync());
+      if (note) notes.push(note);
+    }
+  }
+
+  return notes.sort((a, b) => b.frontmatter.id.localeCompare(a.frontmatter.id));
+}
+
+export function readNote(folder: string, id: string): Note | null {
+  const file = new File(notesRoot(), folder, `${id}.md`);
+  if (!file.exists) return null;
+  return parseNote(file.textSync());
 }

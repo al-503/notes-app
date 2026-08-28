@@ -1,112 +1,79 @@
-import { useRef, useState } from 'react';
-import { Pressable, StyleSheet, TextInput } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { FlatList, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useRecorder } from '@/audio/useRecorder';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
-import { saveNote } from '@/notes/noteStorage';
+import { Note } from '@/notes/noteFormat';
+import { listNotes } from '@/notes/noteStorage';
 
-function formatDuration(ms: number) {
-  const totalSeconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+function formatDate(iso: string) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
-export default function RecordScreen() {
-  const theme = useTheme();
-  const { isRecording, durationMillis, start, stop } = useRecorder();
-  const [transcript, setTranscript] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [savedMessage, setSavedMessage] = useState<string | null>(null);
-  const transcriptInputRef = useRef<TextInput>(null);
-
-  const onToggleRecording = async () => {
-    setError(null);
-    setSavedMessage(null);
-    try {
-      if (isRecording) {
-        await stop();
-      } else {
-        transcriptInputRef.current?.focus();
-        await start();
-        // La popup de permission micro (1re fois seulement) referme le clavier :
-        // on le rouvre après coup, au cas où.
-        transcriptInputRef.current?.focus();
+function NoteCard({ note }: { note: Note }) {
+  return (
+    <Pressable
+      onPress={() =>
+        router.push({
+          pathname: '/note/[id]',
+          params: { id: note.frontmatter.id, folder: note.frontmatter.folder },
+        })
       }
-    } catch {
-      setError("Impossible d'accéder au micro. Vérifiez les permissions de l'app.");
-    }
-  };
+      style={styles.card}>
+      <ThemedText type="smallBold" numberOfLines={1}>
+        {note.frontmatter.title}
+      </ThemedText>
+      <ThemedText type="small" themeColor="textSecondary" numberOfLines={2}>
+        {note.body}
+      </ThemedText>
+      <ThemedText type="code" themeColor="textMuted">
+        {note.frontmatter.folder} · {formatDate(note.frontmatter.created)}
+      </ThemedText>
+    </Pressable>
+  );
+}
 
-  const canSave = !isRecording && transcript.trim().length > 0;
+export default function HomeScreen() {
+  const [notes, setNotes] = useState<Note[]>([]);
 
-  const onSave = () => {
-    setError(null);
-    try {
-      saveNote(transcript, durationMillis);
-      setTranscript('');
-      setSavedMessage('Note sauvegardée.');
-    } catch {
-      setError("Impossible de sauvegarder la note.");
-    }
-  };
+  useFocusEffect(
+    useCallback(() => {
+      setNotes(listNotes());
+    }, []),
+  );
 
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title" style={styles.title}>
-          Voix
+          Notes
         </ThemedText>
 
-        <ThemedView type="backgroundElement" style={styles.recordCard}>
-          <Pressable
-            onPress={onToggleRecording}
-            style={[styles.recordButton, isRecording && styles.recordButtonActive]}>
-            <ThemedText type="smallBold" style={styles.recordButtonLabel}>
-              {isRecording ? 'Arrêter' : 'Enregistrer'}
+        <FlatList
+          data={notes}
+          keyExtractor={(note) => note.frontmatter.id}
+          renderItem={({ item }) => <NoteCard note={item} />}
+          contentContainerStyle={styles.list}
+          ListEmptyComponent={
+            <ThemedText type="small" themeColor="textSecondary" style={styles.empty}>
+              Aucune note pour l’instant. Appuyez sur Enregistrer pour commencer.
             </ThemedText>
-          </Pressable>
-          <ThemedText type="code" themeColor="textSecondary">
-            {formatDuration(durationMillis)}
-          </ThemedText>
-        </ThemedView>
+          }
+        />
 
-        {error && (
-          <ThemedText type="small" themeColor="text" style={styles.error}>
-            {error}
-          </ThemedText>
-        )}
-        {savedMessage && (
-          <ThemedText type="small" themeColor="text" style={styles.saved}>
-            {savedMessage}
-          </ThemedText>
-        )}
-
-        <ThemedView type="backgroundElement" style={styles.transcriptCard}>
-          <ThemedText type="small" themeColor="textSecondary">
-            Le clavier s’ouvre à l’enregistrement : appuyez sur son icône micro pour dicter
-          </ThemedText>
-          <TextInput
-            ref={transcriptInputRef}
-            value={transcript}
-            onChangeText={setTranscript}
-            multiline
-            placeholder="Le texte dicté apparaît ici…"
-            placeholderTextColor={theme.textSecondary}
-            style={[styles.transcriptInput, { color: theme.text }]}
-          />
-        </ThemedView>
-
-        <Pressable
-          onPress={onSave}
-          disabled={!canSave}
-          style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}>
+        <Pressable onPress={() => router.push('/record')} style={styles.recordButton}>
           <ThemedText type="smallBold" style={styles.recordButtonLabel}>
-            Sauver la note
+            Enregistrer
           </ThemedText>
         </Pressable>
       </SafeAreaView>
@@ -121,60 +88,35 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    gap: Spacing.three,
   },
   title: {
-    textAlign: 'center',
     marginTop: Spacing.four,
   },
-  recordCard: {
+  list: {
+    gap: Spacing.two,
+    paddingBottom: Spacing.three,
+  },
+  empty: {
+    marginTop: Spacing.five,
+    textAlign: 'center',
+  },
+  card: {
     borderRadius: 22,
     borderWidth: 1,
     borderColor: Colors.border,
-    padding: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.two,
+    backgroundColor: Colors.backgroundElement,
+    padding: Spacing.three,
+    gap: Spacing.one,
   },
   recordButton: {
     backgroundColor: Colors.accent,
     borderRadius: 999,
-    paddingHorizontal: Spacing.five,
-    paddingVertical: Spacing.three,
-  },
-  recordButtonActive: {
-    backgroundColor: Colors.danger,
-  },
-  recordButtonLabel: {
-    color: '#FFFFFF',
-  },
-  error: {
-    color: Colors.danger,
-  },
-  saved: {
-    color: '#4CAF7D',
-  },
-  transcriptCard: {
-    flex: 1,
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    padding: Spacing.three,
-    gap: Spacing.two,
-  },
-  transcriptInput: {
-    flex: 1,
-    fontSize: 16,
-    lineHeight: 24,
-    textAlignVertical: 'top',
-  },
-  saveButton: {
-    backgroundColor: Colors.accent,
-    borderRadius: 19,
     paddingVertical: Spacing.three,
     alignItems: 'center',
     marginBottom: Spacing.three,
   },
-  saveButtonDisabled: {
-    opacity: 0.4,
+  recordButtonLabel: {
+    color: '#FFFFFF',
   },
 });
