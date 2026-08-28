@@ -63,6 +63,40 @@ export function readNote(folder: string, id: string): Note | null {
   return parseNote(file.textSync());
 }
 
+export function deleteNote(folder: string, id: string) {
+  const file = new File(notesRoot(), folder, `${id}.md`);
+  if (file.exists) file.delete();
+}
+
+export function updateNote(
+  currentFolder: string,
+  id: string,
+  updates: { title?: string; body?: string; folder?: string; tags?: string[] },
+): Note | null {
+  const file = new File(notesRoot(), currentFolder, `${id}.md`);
+  if (!file.exists) return null;
+  const existing = parseNote(file.textSync());
+  if (!existing) return null;
+
+  const nextFolder = (updates.folder ?? currentFolder).trim() || DEFAULT_FOLDER;
+  const nextFrontmatter = {
+    ...existing.frontmatter,
+    title: updates.title ?? existing.frontmatter.title,
+    tags: updates.tags ?? existing.frontmatter.tags,
+    folder: nextFolder,
+  };
+  const nextBody = updates.body ?? existing.body;
+
+  if (nextFolder !== currentFolder) {
+    const targetDir = new Directory(notesRoot(), nextFolder);
+    targetDir.create({ intermediates: true, idempotent: true });
+    file.move(targetDir);
+  }
+  file.write(serializeNote(nextFrontmatter, nextBody));
+
+  return { frontmatter: nextFrontmatter, body: nextBody.trim() };
+}
+
 export function listFolders(): { name: string; count: number }[] {
   const root = notesRoot();
   if (!root.exists) return [];

@@ -131,8 +131,17 @@ existants + "+ Nouveau" pour en créer un à la volée) et un champ tags (chips
 tags)`. `folders` liste les dossiers avec leur nombre de notes
 (`listFolders()`), tap → accueil filtré. `note/[id]` reste en lecture seule.
 
-**Pas encore fait** : édition du texte d'une note, suppression, renommage de
-dossier/tag.
+**Étape 3, dernier manque comblé** : `note/[id]` a maintenant un mode édition
+(bouton "Éditer" → titre/texte/dossier/tags modifiables, "Enregistrer" ou
+"Annuler") et un bouton "Supprimer" (confirmation via `Alert.alert`).
+`noteStorage.ts` : `updateNote(currentFolder, id, updates)` déplace le fichier
+si le dossier change (`File.move`) puis réécrit le contenu ;
+`deleteNote(folder, id)` supprime le fichier. `FolderPicker` et `TagEditor`
+extraits en composants partagés (`src/components/`) — utilisés par `record` et
+`note/[id]`, pour ne pas dupliquer une 3e fois le même sélecteur.
+
+Pas encore fait (pas dans le contrat actuel) : renommer un dossier/tag
+partout d'un coup (il faut éditer note par note).
 
 **Accueil aligné sur la maquette** (`design-handoff/.../images/Acceuil_avec_note.png`,
 `Acceuil_sans_note.png`) :
