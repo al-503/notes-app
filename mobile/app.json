@@ -8,6 +8,7 @@
     "scheme": "mobile",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "com.al503.voix",
       "icon": "./assets/expo.icon",
       "infoPlist": {
         "NSSpeechRecognitionUsageDescription": "Voix a besoin de la reconnaissance vocale pour transcrire vos notes.",
@@ -15,6 +16,7 @@
       }
     },
     "android": {
+      "package": "com.al503.voix",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
