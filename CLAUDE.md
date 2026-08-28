@@ -20,7 +20,7 @@ Si un jour on veut de la génération 100 % automatique dans l'appli → modèle
 
 ## Stack
 
-- **Mobile** : Expo (SDK 56, React Native, expo-router), testé via Expo Go sur mon téléphone. Pas d'App Store.
+- **Mobile** : Expo (SDK 54, React Native, expo-router), testé via Expo Go sur mon téléphone. Pas d'App Store.
   Rester sur la dernière version taguée `sdk-XX` stable (voir `npm view expo dist-tags`) : le SDK "latest"
   npm est parfois en avance sur ce que l'appli Expo Go publiée sur les stores supporte réellement.
 - **Audio** : `expo-audio` pour l'enregistrement (`expo-av` est déprécié sur ce SDK).
