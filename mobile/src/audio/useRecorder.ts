@@ -8,8 +8,8 @@ import {
 } from 'expo-audio';
 
 export function useRecorder() {
-  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-  const state = useAudioRecorderState(recorder, 250);
+  const recorder = useAudioRecorder({ ...RecordingPresets.HIGH_QUALITY, isMeteringEnabled: true });
+  const state = useAudioRecorderState(recorder, 100);
 
   const start = useCallback(async () => {
     const { granted } = await requestRecordingPermissionsAsync();
@@ -29,6 +29,7 @@ export function useRecorder() {
   return {
     isRecording: state.isRecording,
     durationMillis: state.durationMillis,
+    metering: state.metering ?? -160,
     start,
     stop,
   };

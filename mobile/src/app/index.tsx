@@ -23,6 +23,40 @@ function GridIcon() {
   );
 }
 
+const EMPTY_STEPS = [
+  'Vous parlez, même 20 secondes',
+  'La transcription arrive à l’arrêt',
+  'Un dossier, deux tags, c’est rangé',
+];
+
+function EmptyState() {
+  return (
+    <View style={styles.emptyState}>
+      <View style={styles.emptyMicCircle}>
+        <Feather name="mic" size={26} color={Colors.accent} />
+      </View>
+      <ThemedText type="title" style={styles.emptyTitle}>
+        Aucune note pour l’instant
+      </ThemedText>
+      <ThemedText type="default" themeColor="textSecondary" style={styles.emptyBody}>
+        Appuyez sur le bouton violet et parlez normalement. Le reste se fait tout seul.
+      </ThemedText>
+      <View style={styles.stepList}>
+        {EMPTY_STEPS.map((step, index) => (
+          <View key={step} style={styles.stepRow}>
+            <View style={styles.stepBadge}>
+              <ThemedText type="code" themeColor="accent">
+                {index + 1}
+              </ThemedText>
+            </View>
+            <ThemedText type="smallBold">{step}</ThemedText>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 function NoteCard({ note }: { note: Note }) {
   return (
     <Pressable
@@ -95,6 +129,8 @@ export default function HomeScreen() {
     [notes],
   );
 
+  const isEmpty = notes.length === 0;
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -104,7 +140,7 @@ export default function HomeScreen() {
               Notes
             </ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
-              {notesThisWeek} note{notesThisWeek > 1 ? 's' : ''} cette semaine
+              {isEmpty ? 'Tout commence par une voix' : `${notesThisWeek} note${notesThisWeek > 1 ? 's' : ''} cette semaine`}
             </ThemedText>
           </View>
           <Pressable onPress={() => router.push('/folders')} style={styles.gridButton}>
@@ -112,63 +148,65 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        <View style={styles.searchBar}>
+        <View style={[styles.searchBar, isEmpty && styles.searchBarEmpty]}>
           <Feather name="search" size={16} color={Colors.textMuted} />
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Rechercher un mot, un tag…"
+            editable={!isEmpty}
+            placeholder={isEmpty ? 'Recherche dès la 1re note' : 'Rechercher un mot, un tag…'}
             placeholderTextColor={Colors.textMuted}
             style={styles.searchInput}
           />
         </View>
 
-        <View style={styles.chipRow}>
-          <Pressable
-            onPress={() => setSelectedFolder(null)}
-            style={[styles.chip, !selectedFolder && styles.chipSelected]}>
-            <ThemedText type="smallBold" themeColor={!selectedFolder ? 'accent' : 'textSecondary'}>
-              Tout
-            </ThemedText>
-          </Pressable>
-          {folders.map((name) => (
-            <Pressable
-              key={name}
-              onPress={() => setSelectedFolder(name)}
-              style={[styles.chip, selectedFolder === name && styles.chipSelected]}>
-              <ThemedText
-                type="smallBold"
-                themeColor={selectedFolder === name ? 'accent' : 'textSecondary'}>
-                {name}
+        {isEmpty ? (
+          <EmptyState />
+        ) : (
+          <>
+            <View style={styles.chipRow}>
+              <Pressable
+                onPress={() => setSelectedFolder(null)}
+                style={[styles.chip, !selectedFolder && styles.chipSelected]}>
+                <ThemedText type="smallBold" themeColor={!selectedFolder ? 'accent' : 'textSecondary'}>
+                  Tout
+                </ThemedText>
+              </Pressable>
+              {folders.map((name) => (
+                <Pressable
+                  key={name}
+                  onPress={() => setSelectedFolder(name)}
+                  style={[styles.chip, selectedFolder === name && styles.chipSelected]}>
+                  <ThemedText
+                    type="smallBold"
+                    themeColor={selectedFolder === name ? 'accent' : 'textSecondary'}>
+                    {name}
+                  </ThemedText>
+                </Pressable>
+              ))}
+            </View>
+
+            <View style={styles.listHeader}>
+              <ThemedText type="small" themeColor="textMuted" style={styles.sectionLabel}>
+                RÉCENTES
               </ThemedText>
-            </Pressable>
-          ))}
-        </View>
+              <ThemedText type="code" themeColor="textMuted">
+                {notes.length} au total
+              </ThemedText>
+            </View>
 
-        <View style={styles.listHeader}>
-          <ThemedText type="small" themeColor="textMuted" style={styles.sectionLabel}>
-            RÉCENTES
-          </ThemedText>
-          <ThemedText type="code" themeColor="textMuted">
-            {notes.length} au total
-          </ThemedText>
-        </View>
-
-        <FlatList
-          data={filteredNotes}
-          keyExtractor={(note) => note.frontmatter.id}
-          renderItem={({ item }) => <NoteCard note={item} />}
-          contentContainerStyle={styles.list}
-          ListEmptyComponent={
-            <ThemedText type="small" themeColor="textSecondary" style={styles.empty}>
-              Aucune note pour l’instant. Appuyez sur le micro pour commencer.
-            </ThemedText>
-          }
-        />
+            <FlatList
+              data={filteredNotes}
+              keyExtractor={(note) => note.frontmatter.id}
+              renderItem={({ item }) => <NoteCard note={item} />}
+              contentContainerStyle={styles.list}
+            />
+          </>
+        )}
 
         <View style={styles.recordZone}>
-          <ThemedText type="smallBold" themeColor="textSecondary">
-            Appuyez pour enregistrer
+          <ThemedText type="smallBold" themeColor={isEmpty ? 'accent' : 'textSecondary'}>
+            {isEmpty ? 'Enregistrer ma première note' : 'Appuyez pour enregistrer'}
           </ThemedText>
           <Pressable onPress={() => router.push('/record')} style={styles.recordButton}>
             <View style={styles.recordGlow} />
@@ -237,6 +275,59 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.text,
   },
+  searchBarEmpty: {
+    borderStyle: 'dashed',
+    opacity: 0.6,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    paddingTop: Spacing.four,
+    gap: Spacing.two,
+  },
+  emptyMicCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: '#7C5CFF1F',
+    borderWidth: 1,
+    borderColor: '#7C5CFF42',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.two,
+  },
+  emptyTitle: {
+    fontSize: 24,
+    textAlign: 'center',
+  },
+  emptyBody: {
+    textAlign: 'center',
+    maxWidth: 280,
+  },
+  stepList: {
+    width: '100%',
+    gap: Spacing.two,
+    marginTop: Spacing.three,
+  },
+  stepRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+    borderRadius: 20,
+    backgroundColor: Colors.backgroundElement,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.three,
+  },
+  stepBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 9,
+    backgroundColor: '#1E1E28',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -265,10 +356,6 @@ const styles = StyleSheet.create({
   list: {
     gap: Spacing.two,
     paddingBottom: Spacing.three,
-  },
-  empty: {
-    marginTop: Spacing.five,
-    textAlign: 'center',
   },
   card: {
     borderRadius: 22,
