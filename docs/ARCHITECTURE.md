@@ -127,7 +127,17 @@ tags)`. `folders` liste les dossiers avec leur nombre de notes
 (`listFolders()`), tap → accueil filtré. `note/[id]` reste en lecture seule.
 
 **Pas encore fait** : édition du texte d'une note, suppression, renommage de
-dossier/tag, recherche.
+dossier/tag.
+
+**Accueil aligné sur la maquette** (`design-handoff/.../images/Acceuil.png`) :
+sous-titre "X notes cette semaine", bouton grille → `/folders`, barre de
+recherche (filtre titre/corps/tags, client-side, pas de recherche plein texte
+indexée), chips de dossier ("Tout" + dossiers existants), compteur "X au
+total", carte avec durée + pastille dossier + date relative
+(`notes/format.ts` : `formatDuration`, `formatRelativeDate`), gros bouton micro
+circulaire avec halo en bas plutôt que la pilule "Enregistrer". Ajout de
+`@expo/vector-icons` (bundlé avec `expo`, juste jamais installé) pour les
+icônes (loupe, micro) plutôt que de les dessiner à la main.
 
 ---
 
