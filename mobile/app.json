@@ -48,7 +48,8 @@
           "microphonePermission": "Voix a besoin du micro pour enregistrer vos notes vocales.",
           "speechRecognitionPermission": "Voix a besoin de la reconnaissance vocale pour transcrire vos notes."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
