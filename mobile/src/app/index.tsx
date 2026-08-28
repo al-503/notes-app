@@ -9,8 +9,42 @@ import { ThemedView } from '@/components/themed-view';
 import { Colors, Spacing } from '@/constants/theme';
 import { formatDuration, formatRelativeDate } from '@/notes/format';
 import { Note } from '@/notes/noteFormat';
-import { listFolders, listNotes } from '@/notes/noteStorage';
+import { canAccessNotesStorage, listFolders, listNotes } from '@/notes/noteStorage';
 import { Feather } from '@expo/vector-icons';
+import { ActivityAction, startActivityAsync } from 'expo-intent-launcher';
+import Constants from 'expo-constants';
+
+function StorageAccessBanner() {
+  const onPress = () => {
+    const packageName = Constants.expoConfig?.android?.package ?? '';
+    startActivityAsync(ActivityAction.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, {
+      data: `package:${packageName}`,
+    }).catch(() => {});
+  };
+
+  return (
+    <Pressable onPress={onPress} style={bannerStyles.banner}>
+      <ThemedText type="smallBold" themeColor="accent">
+        Autoriser l’accès aux fichiers pour activer la synchro
+      </ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        Nécessaire pour que Syncthing voie tes notes. Appuie ici, puis active
+        « Autoriser la gestion de tous les fichiers ».
+      </ThemedText>
+    </Pressable>
+  );
+}
+
+const bannerStyles = StyleSheet.create({
+  banner: {
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    backgroundColor: '#6366F11A',
+    padding: Spacing.three,
+    gap: 4,
+  },
+});
 
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -100,9 +134,11 @@ export default function HomeScreen() {
   const [folders, setFolders] = useState<string[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const [hasStorageAccess, setHasStorageAccess] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
+      setHasStorageAccess(canAccessNotesStorage());
       setNotes(listNotes());
       setFolders(listFolders().map((f) => f.name));
     }, []),
@@ -135,6 +171,8 @@ export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
+        {!hasStorageAccess && <StorageAccessBanner />}
+
         <View style={styles.header}>
           <View>
             <ThemedText type="title" style={styles.title}>

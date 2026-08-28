@@ -169,11 +169,34 @@ pas dans cette maquette précise) restent en dessous, inchangés.
 
 ---
 
-## 4. Sync (rempli par infra-dev)
+## 4. Sync (implémenté partiellement : Pi ↔ PC fait, téléphone en cours)
 
-Syncthing sur le Pi 4, service systemd au boot, partage du dossier `notes/` entre
-téléphone, Pi et PC, sur le réseau local uniquement. Sauvegarde locale datée du
-dossier `notes/`. Procédure détaillée à ajouter ici une fois installée.
+Syncthing installé sur le Pi 4 (`sudo apt install syncthing`) et sur le PC,
+tous deux en service persistant (`syncthing@<user>.service` + `loginctl
+enable-linger` sur le Pi ; `systemctl --user enable --now syncthing.service`
+sur le PC — le PC restant allumé/connecté quand on veut synchroniser). Dossier
+partagé `voix-notes` : `notes-app/notes/` sur le PC, `~/voix-notes` sur le Pi.
+Config faite via l'API REST de Syncthing (`PUT /rest/config/devices/...` puis
+`/rest/config/folders/voix-notes`), pas besoin de passer par l'interface web.
+Réseau local uniquement, adresses `tcp://192.168.x.x:22000`, zéro cloud.
+
+**Point bloquant côté téléphone (résolu) :** `Paths.document` d'expo-file-system
+sur Android pointe vers le stockage **privé** de l'app
+(`/data/data/<package>/files`), invisible pour toute autre app y compris
+Syncthing — aucune permission ne débloque ça, c'est le sandboxing Android.
+Décision : `notesRoot()` (`noteStorage.ts`) écrit maintenant dans un dossier
+**public** sur Android (`/storage/emulated/0/Documents/Voix/notes`), derrière
+la permission spéciale `MANAGE_EXTERNAL_STORAGE` ("Accès à tous les
+fichiers"). Cette permission ne peut pas être demandée par une popup normale :
+`expo-intent-launcher` ouvre l'écran système dédié
+(`MANAGE_APP_ALL_FILES_ACCESS_PERMISSION`), affiché via un bandeau sur
+l'accueil (`canAccessNotesStorage()` détecte si l'accès manque). iOS n'a pas
+cet équivalent — `Paths.document` (sandbox) y reste utilisé tel quel,
+problème à retraiter séparément si le projet vise iOS un jour.
+
+Reste à faire : installer Syncthing sur le téléphone (app officielle, dispo
+sur le Play Store) et le pointer vers `Documents/Voix/notes` une fois la
+permission accordée dans l'app.
 
 ---
 

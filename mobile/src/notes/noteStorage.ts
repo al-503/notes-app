@@ -1,11 +1,29 @@
 import { Directory, File, Paths } from 'expo-file-system';
+import { Platform } from 'react-native';
 
 import { deriveTitle, makeNoteId, Note, parseNote, serializeNote } from './noteFormat';
 
 export const DEFAULT_FOLDER = 'captures';
 
+// Sur Android, un dossier public (pas le stockage privé de l'app) pour que
+// Syncthing puisse le lire — voir ARCHITECTURE.md, la sync du contrat.
+const ANDROID_PUBLIC_NOTES_URI = 'file:///storage/emulated/0/Documents/Voix/notes';
+
 function notesRoot() {
+  if (Platform.OS === 'android') {
+    return new Directory(ANDROID_PUBLIC_NOTES_URI);
+  }
   return new Directory(Paths.document, 'notes');
+}
+
+export function canAccessNotesStorage(): boolean {
+  try {
+    const root = notesRoot();
+    root.create({ intermediates: true, idempotent: true });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function saveNote(
