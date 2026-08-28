@@ -8,11 +8,17 @@ function notesRoot() {
   return new Directory(Paths.document, 'notes');
 }
 
-export function saveNote(transcript: string, durationMillis: number) {
+export function saveNote(
+  transcript: string,
+  durationMillis: number,
+  folder: string = DEFAULT_FOLDER,
+  tags: string[] = [],
+) {
   const now = new Date();
   const id = makeNoteId(now);
+  const cleanFolder = folder.trim() || DEFAULT_FOLDER;
 
-  const dir = new Directory(notesRoot(), DEFAULT_FOLDER);
+  const dir = new Directory(notesRoot(), cleanFolder);
   dir.create({ intermediates: true, idempotent: true });
 
   const file = new File(dir, `${id}.md`);
@@ -20,9 +26,9 @@ export function saveNote(transcript: string, durationMillis: number) {
     {
       id,
       created: now.toISOString(),
-      folder: DEFAULT_FOLDER,
+      folder: cleanFolder,
       title: deriveTitle(transcript),
-      tags: [],
+      tags,
       status: 'raw',
       duration_sec: Math.round(durationMillis / 1000),
     },
@@ -55,4 +61,18 @@ export function readNote(folder: string, id: string): Note | null {
   const file = new File(notesRoot(), folder, `${id}.md`);
   if (!file.exists) return null;
   return parseNote(file.textSync());
+}
+
+export function listFolders(): { name: string; count: number }[] {
+  const root = notesRoot();
+  if (!root.exists) return [];
+
+  const folders: { name: string; count: number }[] = [];
+  for (const entry of root.list()) {
+    if (!(entry instanceof Directory)) continue;
+    const count = entry.list().filter((item) => item instanceof File && item.extension === '.md').length;
+    folders.push({ name: entry.name, count });
+  }
+
+  return folders.sort((a, b) => a.name.localeCompare(b.name));
 }

@@ -117,15 +117,17 @@ EAS (reste gratuit et local, aucun lien avec l'abonnement Claude).
 
 Post-MVP : recherche plein texte, marquage `processed`, export.
 
-**Étape 3 du MVP (écran de liste)** — implémentée partiellement : `index` est
-devenu l'écran d'accueil (titre "Notes", liste des notes via `listNotes()`,
-bouton "Enregistrer" qui pousse vers `/record`). `record` est maintenant son
-propre écran (bouton "Annuler" pour revenir), il redirige vers l'accueil après
-sauvegarde. `note/[id]` affiche le texte complet en lecture seule (id + dossier
-passés en paramètres de route). **Pas encore fait** : édition du texte,
-suppression, sélecteur dossier/tags, écran `folders` dédié — `listNotes()` lit
-déjà tous les dossiers sous `notes/`, donc `folders` viendra sans changement de
-contrat quand on s'y attaque.
+**Étape 3 du MVP (dossiers/tags + écran de liste)** — implémentée : `index` est
+l'écran d'accueil (liste des notes via `listNotes()`, bouton "Enregistrer" vers
+`/record`, lien "Dossiers" vers `/folders`, filtrable par `?folder=` en
+paramètre de route). `record` a un sélecteur de dossier (chips des dossiers
+existants + "+ Nouveau" pour en créer un à la volée) et un champ tags (chips
++ saisie libre), câblés sur `saveNote(transcript, durationMillis, folder,
+tags)`. `folders` liste les dossiers avec leur nombre de notes
+(`listFolders()`), tap → accueil filtré. `note/[id]` reste en lecture seule.
+
+**Pas encore fait** : édition du texte d'une note, suppression, renommage de
+dossier/tag, recherche.
 
 ---
 

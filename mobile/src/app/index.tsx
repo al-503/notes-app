@@ -1,6 +1,6 @@
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { FlatList, Pressable, StyleSheet } from 'react-native';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -44,6 +44,7 @@ function NoteCard({ note }: { note: Note }) {
 }
 
 export default function HomeScreen() {
+  const { folder } = useLocalSearchParams<{ folder?: string }>();
   const [notes, setNotes] = useState<Note[]>([]);
 
   useFocusEffect(
@@ -52,15 +53,27 @@ export default function HomeScreen() {
     }, []),
   );
 
+  const filteredNotes = useMemo(
+    () => (folder ? notes.filter((note) => note.frontmatter.folder === folder) : notes),
+    [notes, folder],
+  );
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title" style={styles.title}>
-          Notes
-        </ThemedText>
+        <View style={styles.header}>
+          <ThemedText type="title" style={styles.title}>
+            {folder ?? 'Notes'}
+          </ThemedText>
+          <Pressable onPress={() => router.push('/folders')}>
+            <ThemedText type="smallBold" themeColor="textSecondary">
+              Dossiers
+            </ThemedText>
+          </Pressable>
+        </View>
 
         <FlatList
-          data={notes}
+          data={filteredNotes}
           keyExtractor={(note) => note.frontmatter.id}
           renderItem={({ item }) => <NoteCard note={item} />}
           contentContainerStyle={styles.list}
@@ -90,8 +103,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     gap: Spacing.three,
   },
-  title: {
+  header: {
     marginTop: Spacing.four,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  title: {
+    textTransform: 'capitalize',
   },
   list: {
     gap: Spacing.two,
