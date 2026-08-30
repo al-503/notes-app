@@ -61,64 +61,6 @@ export function canAccessNotesStorage(): boolean {
   }
 }
 
-// Diagnostic temporaire — à retirer une fois la synchro stable.
-// Rejoue pas à pas la résolution de dossier de saveNote() (sans écrire de
-// fichier) pour voir à quel niveau exact le chemin se retrouve plat au lieu
-// d'être imbriqué sous Documents/Voix/notes/<folder>/.
-export function debugSaveTrace(folder: string = DEFAULT_FOLDER): string {
-  const lines: string[] = [];
-  const cleanFolder = folder.trim() || DEFAULT_FOLDER;
-  try {
-    let dir = new Directory('file:///storage/emulated/0');
-    lines.push(`départ: ${dir.uri}`);
-    for (const segment of ANDROID_PUBLIC_SEGMENTS) {
-      const child = new Directory(dir, segment);
-      lines.push(`  new Directory(dir, '${segment}') -> ${child.uri} (exists avant création: ${child.exists})`);
-      dir = child.exists ? child : dir.createDirectory(segment);
-      lines.push(`  -> retenu: ${dir.uri} (exists après: ${dir.exists})`);
-    }
-    const folderChild = new Directory(dir, cleanFolder);
-    lines.push(`new Directory(root, '${cleanFolder}') -> ${folderChild.uri} (exists avant: ${folderChild.exists})`);
-    const folderDir = folderChild.exists ? folderChild : dir.createDirectory(cleanFolder);
-    lines.push(`-> retenu: ${folderDir.uri} (exists après: ${folderDir.exists})`);
-  } catch (e) {
-    lines.push(`levé : ${e instanceof Error ? e.message : String(e)}`);
-  }
-  return lines.join('\n');
-}
-
-// Diagnostic temporaire — à retirer une fois la synchro stable.
-export function debugNotesStorage(): string {
-  const lines: string[] = [];
-  const root = notesRoot();
-  lines.push(`root.uri = ${root.uri}`);
-  try {
-    lines.push(`root.exists = ${root.exists}`);
-  } catch (e) {
-    lines.push(`root.exists a levé : ${e instanceof Error ? e.message : String(e)}`);
-  }
-  try {
-    const entries = root.list();
-    lines.push(`root.list() = [${entries.map((e) => `${e instanceof Directory ? 'D' : 'F'}:${e.uri}`).join(', ')}]`);
-  } catch (e) {
-    lines.push(`root.list() a levé : ${e instanceof Error ? e.message : String(e)}`);
-  }
-  const captures = new Directory(root, DEFAULT_FOLDER);
-  lines.push(`captures.uri = ${captures.uri}`);
-  try {
-    lines.push(`captures.exists = ${captures.exists}`);
-  } catch (e) {
-    lines.push(`captures.exists a levé : ${e instanceof Error ? e.message : String(e)}`);
-  }
-  try {
-    const entries = captures.list();
-    lines.push(`captures.list() = [${entries.map((e) => e.uri).join(', ')}]`);
-  } catch (e) {
-    lines.push(`captures.list() a levé : ${e instanceof Error ? e.message : String(e)}`);
-  }
-  return lines.join('\n');
-}
-
 export function saveNote(
   transcript: string,
   durationMillis: number,

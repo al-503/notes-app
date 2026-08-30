@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useSpeechToText } from '@/audio/useSpeechToText';
@@ -12,7 +12,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Colors, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDuration } from '@/notes/format';
-import { DEFAULT_FOLDER, debugNotesStorage, debugSaveTrace, listFolders, listNotes, saveNote } from '@/notes/noteStorage';
+import { DEFAULT_FOLDER, listFolders, saveNote } from '@/notes/noteStorage';
 
 const WAVEFORM_BARS = 28;
 const SILENCE_LEVEL = 0.06;
@@ -74,15 +74,8 @@ export default function RecordScreen() {
   const onSave = () => {
     setError(null);
     try {
-      const trace = debugSaveTrace(selectedFolder);
-      const uri = saveNote(transcript, durationMillis, selectedFolder, tags);
-      const afterCount = listNotes().length;
-      const debug = debugNotesStorage();
-      Alert.alert(
-        'Note sauvée (debug)',
-        `URI : ${uri}\nlistNotes() en trouve : ${afterCount}\n\n--- TRACE ---\n${trace}\n\n--- ÉTAT ---\n${debug}`,
-        [{ text: 'OK', onPress: () => router.back() }],
-      );
+      saveNote(transcript, durationMillis, selectedFolder, tags);
+      router.back();
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       setError(`Impossible de sauvegarder la note : ${message}`);
