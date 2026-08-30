@@ -2,6 +2,11 @@
   "name": "mobile",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "expo": {
+    "autolinking": {
+      "buildFromSource": ["expo-file-system"]
+    }
+  },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
     "expo": "54.0.37",
