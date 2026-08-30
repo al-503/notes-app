@@ -257,3 +257,26 @@ Sur le PC, dans le repo, Claude Code voit `notes/`. Pour produire un contenu :
 
 Chaque commande nettoie la transcription, trouve l'angle, et rédige dans le bon format.
 Déclenché à la main = usage interactif = couvert par l'abonnement.
+
+### Dashboard web local
+
+Pour éviter de taper les commandes à la main et copier le résultat depuis la
+conversation, `dashboard/` fournit une page web locale (`./dashboard/start.sh`,
+détails dans `dashboard/README.md`) : liste des notes, un bouton par commande
+découverte dans `.claude/commands/`, résultat affiché avec un bouton "Copier".
+
+Zéro dépendance npm, zéro build : Node `http` natif (Node 22,
+`--experimental-strip-types`), et `dashboard/lib/notes.js` **réutilise
+directement** `mobile/src/notes/noteFormat.ts` via `require()` (le fichier est
+du TS effaçable, sans import RN/Expo — testé, ça marche tel quel) plutôt que
+de dupliquer le parseur du contrat de note.
+
+Chaque clic reste un appel synchrone unique à `claude -p "/<commande> <note>"`
+sur le CLI déjà authentifié par abonnement (jamais de clé API — `generate.js`
+la retire explicitement de l'env de l'enfant par précaution), avec
+`--allowedTools Read,Glob,Grep` + `--disallowedTools Write,Edit,...` en
+défense en profondeur : la génération ne peut que lire, jamais écrire. Serveur
+bindé sur `127.0.0.1` uniquement, lancé à la main, pas de service systemd —
+reste un outil qu'on ouvre pour générer, pas un démon permanent. Toujours
+"usage interactif = couvert par l'abonnement", juste avec un clic à la place
+d'une commande tapée.
