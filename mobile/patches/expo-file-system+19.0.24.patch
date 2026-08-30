@@ -1,3 +1,16 @@
+diff --git a/node_modules/expo-file-system/android/build.gradle b/node_modules/expo-file-system/android/build.gradle
+index fde022a..6c5e6d9 100644
+--- a/node_modules/expo-file-system/android/build.gradle
++++ b/node_modules/expo-file-system/android/build.gradle
+@@ -4,7 +4,7 @@ plugins {
+ }
+ 
+ group = 'host.exp.exponent'
+-version = '19.0.24'
++version = '19.0.24-claudepatch1'
+ 
+ android {
+   namespace "expo.modules.filesystem"
 diff --git a/node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/unifiedfile/JavaFile.kt b/node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/unifiedfile/JavaFile.kt
 index fd3c8f9..300c093 100644
 --- a/node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/unifiedfile/JavaFile.kt
