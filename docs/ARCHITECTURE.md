@@ -187,7 +187,7 @@ pas dans cette maquette précise) restent en dessous, inchangés.
 
 ---
 
-## 4. Sync (implémenté partiellement : Pi ↔ PC fait, téléphone en cours)
+## 4. Sync (Pi ↔ PC ↔ téléphone, fait)
 
 Syncthing installé sur le Pi 4 (`sudo apt install syncthing`) et sur le PC,
 tous deux en service persistant (`syncthing@<user>.service` + `loginctl
@@ -227,9 +227,21 @@ avancent d'un niveau à la fois via `.createDirectory()`/`.createFile()` du
 dossier **parent** (qui, lui, existe déjà au moment de l'appel — la
 validation porte sur lui, pas sur la cible inexistante).
 
-Reste à faire : installer Syncthing sur le téléphone (app officielle, dispo
-sur le Play Store) et le pointer vers `Documents/Voix/notes` une fois la
-permission accordée dans l'app.
+**Téléphone (fait) :** Syncthing-Fork (`com.github.catfriend1.syncthingandroid`,
+pas l'app officielle — plus activement maintenue) installé, appairé au PC, et
+dossier `voix-notes` ajouté manuellement avec le même Folder ID pointant vers
+`Documents/Voix/notes`, partagé avec le device du PC. Vérifié via l'API REST
+du PC (`/rest/db/completion?device=...&folder=voix-notes`) : `remoteState:
+"valid"`, complétion 100 %.
+
+Piège rencontré : Syncthing-Fork a affiché une erreur bloquante `insufficient
+space on disk for database` sur les deux dossiers alors que le téléphone
+n'était qu'à ~50 % de stockage utilisé. Bug connu de longue date sur
+syncthing-android/syncthing-fork (seuil `minDiskFree`, 1 % par défaut, mal
+calculé sur `/data`, déconnecté du pourcentage global affiché dans les
+Paramètres Android — cf. issue GitHub #1527 du repo archivé). Résolu en
+vidant le cache de l'appli (pas les données, pour ne pas perdre l'identité
+de l'appareil déjà appairé).
 
 ---
 
