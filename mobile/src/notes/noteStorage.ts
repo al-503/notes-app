@@ -50,11 +50,73 @@ function ensureFile(dir: Directory, fileName: string): File {
 
 export function canAccessNotesStorage(): boolean {
   try {
-    ensureNotesRoot();
+    const root = ensureNotesRoot();
+    // ensureNotesRoot() ne valide que l'écriture (WRITE) ; sur Android, READ
+    // est une permission distincte qui peut manquer même quand WRITE passe.
+    // .list() est le seul appel qui la vérifie réellement.
+    root.list();
     return true;
   } catch {
     return false;
   }
+}
+
+// Diagnostic temporaire — à retirer une fois la synchro stable.
+// Rejoue pas à pas la résolution de dossier de saveNote() (sans écrire de
+// fichier) pour voir à quel niveau exact le chemin se retrouve plat au lieu
+// d'être imbriqué sous Documents/Voix/notes/<folder>/.
+export function debugSaveTrace(folder: string = DEFAULT_FOLDER): string {
+  const lines: string[] = [];
+  const cleanFolder = folder.trim() || DEFAULT_FOLDER;
+  try {
+    let dir = new Directory('file:///storage/emulated/0');
+    lines.push(`départ: ${dir.uri}`);
+    for (const segment of ANDROID_PUBLIC_SEGMENTS) {
+      const child = new Directory(dir, segment);
+      lines.push(`  new Directory(dir, '${segment}') -> ${child.uri} (exists avant création: ${child.exists})`);
+      dir = child.exists ? child : dir.createDirectory(segment);
+      lines.push(`  -> retenu: ${dir.uri} (exists après: ${dir.exists})`);
+    }
+    const folderChild = new Directory(dir, cleanFolder);
+    lines.push(`new Directory(root, '${cleanFolder}') -> ${folderChild.uri} (exists avant: ${folderChild.exists})`);
+    const folderDir = folderChild.exists ? folderChild : dir.createDirectory(cleanFolder);
+    lines.push(`-> retenu: ${folderDir.uri} (exists après: ${folderDir.exists})`);
+  } catch (e) {
+    lines.push(`levé : ${e instanceof Error ? e.message : String(e)}`);
+  }
+  return lines.join('\n');
+}
+
+// Diagnostic temporaire — à retirer une fois la synchro stable.
+export function debugNotesStorage(): string {
+  const lines: string[] = [];
+  const root = notesRoot();
+  lines.push(`root.uri = ${root.uri}`);
+  try {
+    lines.push(`root.exists = ${root.exists}`);
+  } catch (e) {
+    lines.push(`root.exists a levé : ${e instanceof Error ? e.message : String(e)}`);
+  }
+  try {
+    const entries = root.list();
+    lines.push(`root.list() = [${entries.map((e) => `${e instanceof Directory ? 'D' : 'F'}:${e.uri}`).join(', ')}]`);
+  } catch (e) {
+    lines.push(`root.list() a levé : ${e instanceof Error ? e.message : String(e)}`);
+  }
+  const captures = new Directory(root, DEFAULT_FOLDER);
+  lines.push(`captures.uri = ${captures.uri}`);
+  try {
+    lines.push(`captures.exists = ${captures.exists}`);
+  } catch (e) {
+    lines.push(`captures.exists a levé : ${e instanceof Error ? e.message : String(e)}`);
+  }
+  try {
+    const entries = captures.list();
+    lines.push(`captures.list() = [${entries.map((e) => e.uri).join(', ')}]`);
+  } catch (e) {
+    lines.push(`captures.list() a levé : ${e instanceof Error ? e.message : String(e)}`);
+  }
+  return lines.join('\n');
 }
 
 export function saveNote(
@@ -93,7 +155,16 @@ export function listNotes(): Note[] {
   const notes: Note[] = [];
   for (const entry of root.list()) {
     if (!(entry instanceof Directory)) continue;
-    for (const item of entry.list()) {
+    // Sur Android, la permission READ est vérifiée dossier par dossier : un
+    // sous-dossier fraîchement créé peut la refuser alors que root l'a déjà
+    // (cf. debugNotesStorage). On ignore ce dossier plutôt que de planter.
+    let items: (Directory | File)[];
+    try {
+      items = entry.list();
+    } catch {
+      continue;
+    }
+    for (const item of items) {
       if (!(item instanceof File) || item.extension !== '.md') continue;
       const note = parseNote(item.textSync());
       if (note) notes.push(note);
@@ -149,7 +220,12 @@ export function listFolders(): { name: string; count: number }[] {
   const folders: { name: string; count: number }[] = [];
   for (const entry of root.list()) {
     if (!(entry instanceof Directory)) continue;
-    const count = entry.list().filter((item) => item instanceof File && item.extension === '.md').length;
+    let count = 0;
+    try {
+      count = entry.list().filter((item) => item instanceof File && item.extension === '.md').length;
+    } catch {
+      continue;
+    }
     folders.push({ name: entry.name, count });
   }
 

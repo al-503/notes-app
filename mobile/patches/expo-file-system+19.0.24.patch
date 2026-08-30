@@ -1,0 +1,21 @@
+diff --git a/node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/unifiedfile/JavaFile.kt b/node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/unifiedfile/JavaFile.kt
+index fd3c8f9..300c093 100644
+--- a/node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/unifiedfile/JavaFile.kt
++++ b/node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/unifiedfile/JavaFile.kt
+@@ -22,13 +22,14 @@ class JavaFile(override val uri: Uri) : UnifiedFileInterface, File(URI.create(ur
+     get() = super<File>.parentFile?.toUri()?.let { JavaFile(it) }
+ 
+   override fun createFile(mimeType: String, displayName: String): UnifiedFileInterface? {
+-    val childFile = File(super<File>.parentFile, displayName)
++    val childFile = File(this, displayName)
+     childFile.createNewFile()
+     return JavaFile(childFile.toUri())
+   }
+ 
+   override fun createDirectory(displayName: String): UnifiedFileInterface? {
+-    val childFile = File(super<File>.parentFile, displayName)
++    println("CLAUDE_PATCH_MARKER_v1_actif")
++    val childFile = File(this, displayName)
+     childFile.mkdir()
+     return JavaFile(childFile.toUri())
+   }
