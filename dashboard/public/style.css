@@ -122,6 +122,14 @@ main {
   color: var(--text-2);
   font: 400 14px/1.5 Manrope, sans-serif;
   margin: 0;
+  cursor: pointer;
+}
+
+.note-excerpt:hover { color: var(--text-body); }
+
+.note-excerpt-expanded {
+  white-space: pre-line;
+  color: var(--text-body);
 }
 
 .note-tags { display: flex; gap: 8px; margin-top: 2px; flex-wrap: wrap; }

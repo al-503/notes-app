@@ -38,6 +38,7 @@ function listNotes(repoRoot) {
         status: note.frontmatter.status,
         duration_sec: note.frontmatter.duration_sec,
         excerpt: excerpt(note.body),
+        body: note.body,
       });
     }
   }

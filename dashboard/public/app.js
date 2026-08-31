@@ -65,7 +65,16 @@ function renderNotes(notes, commands) {
     subline.appendChild(el('span', 'note-date', formatRelativeDate(note.created)));
     card.appendChild(subline);
 
-    if (note.excerpt) card.appendChild(el('p', 'note-excerpt', note.excerpt));
+    if (note.excerpt) {
+      const excerptEl = el('p', 'note-excerpt', note.excerpt);
+      let expanded = false;
+      excerptEl.addEventListener('click', () => {
+        expanded = !expanded;
+        excerptEl.textContent = expanded ? note.body : note.excerpt;
+        excerptEl.classList.toggle('note-excerpt-expanded', expanded);
+      });
+      card.appendChild(excerptEl);
+    }
 
     if (note.tags.length > 0) {
       const tags = el('div', 'note-tags');
