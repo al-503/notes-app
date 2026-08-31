@@ -1,6 +1,6 @@
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { AppState, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RecordButton } from '@/components/record-button';
@@ -136,13 +136,32 @@ export default function HomeScreen() {
   const [query, setQuery] = useState('');
   const [hasStorageAccess, setHasStorageAccess] = useState(true);
 
+  const refresh = useCallback(() => {
+    setHasStorageAccess(canAccessNotesStorage());
+    setNotes(listNotes());
+    setFolders(listFolders().map((f) => f.name));
+  }, []);
+
+  // Syncthing écrit les nouvelles notes en arrière-plan, sans qu'on change
+  // d'écran ni ne quitte l'appli : on reste sur l'accueil, donc un simple
+  // rechargement au focus ne suffit pas, il faut revérifier à intervalles
+  // réguliers tant que cet écran est affiché.
   useFocusEffect(
     useCallback(() => {
-      setHasStorageAccess(canAccessNotesStorage());
-      setNotes(listNotes());
-      setFolders(listFolders().map((f) => f.name));
-    }, []),
+      refresh();
+      const interval = setInterval(refresh, 3000);
+      return () => clearInterval(interval);
+    }, [refresh]),
   );
+
+  // Complément : un retour au premier plan (après le multitâche) rafraîchit
+  // tout de suite, sans attendre le prochain tick de l'intervalle ci-dessus.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') refresh();
+    });
+    return () => subscription.remove();
+  }, [refresh]);
 
   useEffect(() => {
     if (folderParam) setSelectedFolder(folderParam);

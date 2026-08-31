@@ -56,8 +56,14 @@ function renderNotes(notes, commands) {
 
     const header = el('div', 'note-header');
     header.appendChild(el('h3', null, note.title || 'Note sans titre'));
-    header.appendChild(el('span', 'note-meta', `${note.folder} · ${formatRelativeDate(note.created)} · ${formatDuration(note.duration_sec * 1000)}`));
+    header.appendChild(el('span', 'note-duration', formatDuration(note.duration_sec * 1000)));
     card.appendChild(header);
+
+    const subline = el('div', 'note-subline');
+    subline.appendChild(el('span', 'folder-pill', note.folder));
+    subline.appendChild(el('span', 'dot'));
+    subline.appendChild(el('span', 'note-date', formatRelativeDate(note.created)));
+    card.appendChild(subline);
 
     if (note.excerpt) card.appendChild(el('p', 'note-excerpt', note.excerpt));
 
