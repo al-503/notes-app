@@ -27,6 +27,8 @@
 
 * { box-sizing: border-box; }
 
+.hidden { display: none; }
+
 body {
   margin: 0;
   background: var(--bg);
@@ -60,6 +62,37 @@ main {
 }
 
 .loading { color: var(--text-2); font: 500 14px Manrope, sans-serif; }
+
+.folders-section {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 12px 22px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-title {
+  margin: 8px 0 0;
+  font: 700 14px Manrope, sans-serif;
+  color: var(--text-1);
+}
+
+#folders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.folder-card {
+  background: var(--surface);
+  border: 1px solid var(--accent-40-border);
+  border-radius: 22px;
+  padding: 17px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 .note-card {
   background: var(--surface);

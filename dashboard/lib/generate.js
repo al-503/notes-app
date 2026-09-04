@@ -9,7 +9,7 @@ let activeChild = null;
 // Un clic = un appel synchrone unique au `claude` CLI déjà authentifié par
 // abonnement (pas de clé API — voir CLAUDE.md, "principe fondamental") :
 // exactement l'équivalent de taper la commande soi-même dans le terminal.
-function runGenerate({ repoRoot, command, notePath }) {
+function runGenerate({ repoRoot, command, notePaths }) {
   return new Promise((resolve, reject) => {
     // ANTHROPIC_API_KEY explicitement retirée de l'env de l'enfant, même si
     // elle n'est pas définie aujourd'hui : protège contre un futur export
@@ -20,7 +20,7 @@ function runGenerate({ repoRoot, command, notePath }) {
     const child = execFile(
       'claude',
       [
-        '-p', `/${command} ${notePath}`,
+        '-p', `/${command} ${notePaths.join(' ')}`,
         '--output-format', 'json',
         '--permission-mode', 'dontAsk',
         '--allowedTools', 'Read,Glob,Grep',

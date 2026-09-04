@@ -1,16 +1,18 @@
 ---
-description: Transforme une note vocale en script de vidéo YouTube.
-argument-hint: <chemin-vers-la-note.md>
+description: Transforme une ou plusieurs notes vocales en script de vidéo YouTube.
+argument-hint: <chemin-vers-la-note.md> [chemin-vers-une-autre-note.md...]
 ---
 
-Lis la note suivante : $ARGUMENTS
+Lis la ou les notes suivantes : $ARGUMENTS
 
 Puis, en trois temps (ne montre que le résultat) :
 
-1. **Nettoyage** : corrige la transcription vocale (fautes, ponctuation, mots ratés)
-   sans en changer le sens.
-2. **Structure** : dégage le fil : de quoi ça parle, quelles sont les 3 à 5 idées
-   à développer, dans quel ordre logique.
+1. **Nettoyage** : corrige la transcription vocale de chaque note (fautes,
+   ponctuation, mots ratés) sans en changer le sens.
+2. **Structure** : dégage le fil. S'il y a plusieurs notes, elles forment un
+   seul sujet : fusionne-les en un fil unique cohérent, ne fais pas une
+   section par note. Détermine quelles sont les 3 à 5 idées à développer, dans
+   quel ordre logique.
 3. **Écriture du script** en français, avec une voix humaine, pas une voix
    IA. Lis d'abord `docs/STYLE-GENERATION.md` et applique-le strictement
    (vocabulaire, structures, rythme, ouvertures/clôtures à bannir). En plus

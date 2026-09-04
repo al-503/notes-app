@@ -39,7 +39,56 @@ async function loadData() {
   ]);
   const { notes } = await notesRes.json();
   const { commands } = await commandsRes.json();
+  renderFolders(notes, commands);
   renderNotes(notes, commands);
+}
+
+function groupByFolder(notes) {
+  const groups = new Map();
+  for (const note of notes) {
+    if (!groups.has(note.folder)) groups.set(note.folder, []);
+    groups.get(note.folder).push(note);
+  }
+  return groups;
+}
+
+function renderFolders(notes, commands) {
+  const section = document.getElementById('folders-section');
+  const container = document.getElementById('folders-list');
+  container.textContent = '';
+
+  const groups = [...groupByFolder(notes).entries()].filter(([, group]) => group.length >= 2);
+  if (groups.length === 0) {
+    section.classList.add('hidden');
+    return;
+  }
+  section.classList.remove('hidden');
+
+  for (const [folder, group] of groups) {
+    const card = el('article', 'folder-card');
+
+    const header = el('div', 'note-header');
+    header.appendChild(el('h3', null, folder));
+    header.appendChild(el('span', 'note-duration', `${group.length} notes`));
+    card.appendChild(header);
+
+    const actions = el('div', 'note-actions');
+    for (const command of commands) {
+      const button = el('button', 'command-button', `Combiner en ${command.description || command.name}`);
+      button.title = `Combine les ${group.length} notes de "${folder}" en un seul ${command.name}`;
+      button.addEventListener('click', () =>
+        runGeneration({
+          label: `${command.name} — ${folder} (${group.length} notes combinées)`,
+          notePaths: group.map((n) => n.path),
+          command,
+        }),
+      );
+      actions.appendChild(button);
+    }
+    card.appendChild(actions);
+
+    container.appendChild(card);
+  }
 }
 
 function renderNotes(notes, commands) {
@@ -86,7 +135,13 @@ function renderNotes(notes, commands) {
     for (const command of commands) {
       const button = el('button', 'command-button', command.description || command.name);
       button.title = command.description || command.name;
-      button.addEventListener('click', () => generate(note, command));
+      button.addEventListener('click', () =>
+        runGeneration({
+          label: `${command.name} — ${note.title || note.id}`,
+          notePaths: [note.path],
+          command,
+        }),
+      );
       actions.appendChild(button);
     }
     card.appendChild(actions);
@@ -95,14 +150,14 @@ function renderNotes(notes, commands) {
   }
 }
 
-async function generate(note, command) {
+async function runGeneration({ label, notePaths, command }) {
   const overlay = document.getElementById('result-overlay');
   const title = document.getElementById('result-title');
   const status = document.getElementById('result-status');
   const text = document.getElementById('result-text');
   const copyButton = document.getElementById('copy-result');
 
-  title.textContent = `${command.name} — ${note.title || note.id}`;
+  title.textContent = label;
   status.textContent = 'Génération en cours (jusqu’à 3 min)…';
   text.value = '';
   copyButton.disabled = true;
@@ -114,7 +169,7 @@ async function generate(note, command) {
     const res = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notePath: note.path, command: command.name }),
+      body: JSON.stringify({ notePaths, command: command.name }),
     });
     const data = await res.json();
 

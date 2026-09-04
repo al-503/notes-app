@@ -59,12 +59,17 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
-      const { notePath, command } = body || {};
+      const { notePaths, command } = body || {};
+
+      if (!Array.isArray(notePaths) || notePaths.length === 0) {
+        sendJson(res, 400, { ok: false, error: 'invalid_body' });
+        return;
+      }
 
       // Revalide contre un re-scan à chaud plutôt qu'une regex anti-traversal :
       // pas de canonicalisation à gérer, pas de piège de symlink.
-      const knownNote = listNotes(REPO_ROOT).some((n) => n.path === notePath);
-      if (!knownNote) {
+      const knownPaths = new Set(listNotes(REPO_ROOT).map((n) => n.path));
+      if (!notePaths.every((p) => knownPaths.has(p))) {
         sendJson(res, 400, { ok: false, error: 'unknown_note' });
         return;
       }
@@ -76,7 +81,7 @@ const server = http.createServer(async (req, res) => {
 
       generating = true;
       try {
-        const result = await runGenerate({ repoRoot: REPO_ROOT, command, notePath });
+        const result = await runGenerate({ repoRoot: REPO_ROOT, command, notePaths });
         sendJson(res, 200, { ok: true, result });
       } catch (error) {
         sendJson(res, 500, { ok: false, error: 'generation_failed', detail: error.message });

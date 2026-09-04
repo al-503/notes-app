@@ -1,14 +1,17 @@
 ---
-description: Transforme une note vocale en thread X (Twitter).
-argument-hint: <chemin-vers-la-note.md>
+description: Transforme une ou plusieurs notes vocales en thread X (Twitter).
+argument-hint: <chemin-vers-la-note.md> [chemin-vers-une-autre-note.md...]
 ---
 
-Lis la note suivante : $ARGUMENTS
+Lis la ou les notes suivantes : $ARGUMENTS
 
 Puis (ne montre que le résultat) :
 
-1. **Nettoyage** : corrige la transcription vocale sans changer le fond.
-2. **Angle** : une seule idée directrice pour tout le thread.
+1. **Nettoyage** : corrige la transcription vocale de chaque note sans changer
+   le fond.
+2. **Angle** : une seule idée directrice pour tout le thread. S'il y a
+   plusieurs notes, elles forment un seul sujet à combiner, pas des posts
+   séparés à enchaîner.
 3. **Écriture du thread** en français, avec une voix humaine, pas une voix
    IA. Lis d'abord `docs/STYLE-GENERATION.md` et applique-le strictement
    (vocabulaire, structures, rythme, ouvertures/clôtures à bannir). En plus

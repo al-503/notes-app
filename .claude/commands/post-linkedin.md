@@ -1,16 +1,19 @@
 ---
-description: Transforme une note vocale en post LinkedIn prêt à publier.
-argument-hint: <chemin-vers-la-note.md>
+description: Transforme une ou plusieurs notes vocales en post LinkedIn prêt à publier.
+argument-hint: <chemin-vers-la-note.md> [chemin-vers-une-autre-note.md...]
 ---
 
-Lis la note suivante : $ARGUMENTS
+Lis la ou les notes suivantes : $ARGUMENTS
 
 Puis, en trois temps (fais tout dans ta tête, ne montre que le résultat final) :
 
-1. **Nettoyage** : la note vient d'une dictée vocale : corrige les fautes, la
+1. **Nettoyage** : chaque note vient d'une dictée vocale : corrige les fautes, la
    ponctuation, les mots mal transcrits, sans changer le fond ni inventer d'idées.
-2. **Angle** : identifie l'idée forte, celle qui mérite un post. Une seule idée par
-   post ; si la note en contient plusieurs, garde la plus intéressante et ignore le reste.
+2. **Angle** : identifie l'idée forte, celle qui mérite un post. S'il n'y a qu'une
+   note et qu'elle contient plusieurs idées, garde la plus intéressante et ignore
+   le reste. S'il y a plusieurs notes, considère-les comme les facettes d'un même
+   sujet : combine-les en une seule idée cohérente (ne traite jamais les notes
+   comme des posts séparés à résumer l'un après l'autre).
 3. **Écriture** : rédige un post LinkedIn en français, avec une voix humaine,
    pas une voix IA. Lis d'abord `docs/STYLE-GENERATION.md` et applique-le
    strictement (vocabulaire, structures, rythme, ouvertures/clôtures à
